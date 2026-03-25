@@ -51,8 +51,10 @@ extern TwoWire Wire1;
 
 // Register addresses
 enum QMI8658_Register {
+    // General Purpose Registers
     QMI8658_WHO_AM_I        = 0x00,
     QMI8658_REVISION        = 0x01,
+    //Setup and Control Registers
     QMI8658_CTRL1          = 0x02,
     QMI8658_CTRL2          = 0x03,  // Accelerometer control
     QMI8658_CTRL3          = 0x04,  // Gyroscope control
@@ -60,13 +62,32 @@ enum QMI8658_Register {
     QMI8658_CTRL5          = 0x06,  // Data processing settings
     QMI8658_CTRL6          = 0x07,  // AttitudeEngine control
     QMI8658_CTRL7          = 0x08,  // Sensor enable status
-    QMI8658_CTRL8          = 0x09,
-    QMI8658_CTRL9          = 0x0A,
-    QMI8658_STATUS0        = 0x2E,
-    QMI8658_STATUS1        = 0x2F,
-    QMI8658_TIMESTAMP_L    = 0x30,
-    QMI8658_TIMESTAMP_M    = 0x31,
-    QMI8658_TIMESTAMP_H    = 0x32,
+    QMI8658_CTRL8          = 0x09,  // Motion Detection Control
+    QMI8658_CTRL9          = 0x0A,  // Host Commands
+    // Host Controlled Calibration Registers (See CTRL9, Usage is Optional)
+    QMI8658_CAL1_L         =0x0B,   // Calibration Register
+    QMI8658_CAL1_H         =0x0C,   //CAL1_L – lower 8 bits. CAL1_H – upper 8 bits.
+    QMI8658_CAL2_L         =0x0D,   //Calibration Register
+    QMI8658_CAL2_H         =0x0E,   //CAL2_L – lower 8 bits. CAL2_H – upper 8 bits. 
+    QMI8658_CAL3_L         =0x0F,   //Calibration Register
+    QMI8658_CAL3_H         =0x10,   //CAL3_L – lower 8 bits. CAL3_H – upper 8 bits. 
+    QMI8658_CAL4_L         =0x11,   //Calibration Register
+    QMI8658_CAL4_H         =0x12,   //CAL4_L – lower 8 bits. CAL4_H – upper 8 bits. 
+    // FIFO Registers
+    QMI8658_FIFO_WTM_TH    = 0x13,  //FIFO watermark level, in ODRs
+    QMI8658_FIFO_CTRL      = 0x14,  //FIFO Setup
+    QMI8658_FIFO_SMPL_CNT  = 0x15,  //FIFO Sample Count LSBs
+    QMI8658_FIFO_STATUS    = 0x16,  //FIFO Status
+    QMI8658_FIFO_DATA      = 0x17,  //FIFO Data Output Register
+    //Status Registers
+    QMI8658STATUSINT       = 0x2D,  //Sensor Data Availability with the Locking mechanism, CmdDone (CTRL9 protocol bit).
+    QMI8658_STATUS0        = 0x2E,  //Output Data Over Run and Data Availability.
+    QMI8658_STATUS1        = 0x2F,  //Miscellaneous Status: Any Motion, No Motion, Significant Motion, Pedometer, Tap
+    //Timestamp Register
+    QMI8658_TIMESTAMP_L    = 0x30,  //Sample Time Stamp, TIMESTAMP_LOW – lower 8 bits.
+    QMI8658_TIMESTAMP_M    = 0x31,  //TIMESTAMP_MID – middle 8 bits.
+    QMI8658_TIMESTAMP_H    = 0x32,  //TIMESTAMP_HIGH – upper 8 bits
+    //Data Output Registers (16 bits 2’s Complement Except COD Sensor Data)
     QMI8658_TEMP_L         = 0x33,
     QMI8658_TEMP_H         = 0x34,
     QMI8658_AX_L           = 0x35,
@@ -80,7 +101,33 @@ enum QMI8658_Register {
     QMI8658_GY_L           = 0x3D,
     QMI8658_GY_H           = 0x3E,
     QMI8658_GZ_L           = 0x3F,
-    QMI8658_GZ_H           = 0x40
+    QMI8658_GZ_H           = 0x40,
+    // COD Indication and General Purpose Registers
+
+    QMI8658_COD_STATUS     = 0x46, // Calibration-On-Demand status register
+    QMI8658_dQW_L          = 0x49, // General purpose register
+    QMI8658_dQW_H          = 0x4A, // General purpose register
+    QMI8658_dQX_L          = 0x4B, // General purpose register
+    QMI8658_dQX_H          = 0x4C, // Reserved
+    QMI8658_dQY_L          = 0x4D, // General purpose register
+    QMI8658_dQY_H          = 0x4E,  // Reserved
+    QMI8658_dQZ_L          = 0x4F, // Reserved
+    QMI8658_dQZ_H          = 0x50, // Reserved
+    QMI8658_dVX_L          = 0x51, // General purpose register
+    QMI8658_dVX_H          = 0x52, // General purpose register
+    QMI8658_dVY_L          = 0x53, // General purpose register
+    QMI8658_dVY_H          = 0x54, // General purpose register
+    QMI8658_dVZ_L          = 0x55, // General purpose register
+    QMI8658_dVZ_H          = 0x56, // General purpose register
+
+
+    // Activity Detection Output Registers
+    QMI8658_TAP_STATUS      = 0x59,
+    QMI8658_STEP_CNT_LOW    = 0x5A,
+    QMI8658_STEP_CNT_MIDL   = 0x5B,
+    QMI8658_STEP_CNT_HIGH   = 0x5C,
+    // Reset Register
+    QMI8658_RESET          = 0x60
 };
 
 // Accelerometer range options
@@ -131,6 +178,27 @@ enum QMI8658_GyroODR {
     QMI8658_GYRO_ODR_125HZ    = 0x06,
     QMI8658_GYRO_ODR_62_5HZ   = 0x07,
     QMI8658_GYRO_ODR_31_25HZ  = 0x08
+};
+
+enum qmi8658_Ctrl9Command
+{
+	QMI8658_CTRL9_CMD_NOP					= 0x00,
+	QMI8658_CTRL9_CMD_GYROBIAS				= 0x01,
+	QMI8658_CTRL9_CMD_RQST_SDI_MOD			= 0x03,
+	QMI8658_CTRL9_CMD_RST_FIFO				= 0x04,
+	QMI8658_CTRL9_CMD_REQ_FIFO				= 0x05,
+	QMI8658_CTRL9_CMD_I2CM_WRITE			= 0x06,
+	QMI8658_CTRL9_CMD_WOM_SETTING			= 0x08,
+	QMI8658_CTRL9_CMD_ACCELHOSTDELTAOFFSET	= 0x09,
+	QMI8658_CTRL9_CMD_GYROHOSTDELTAOFFSET	= 0x0A,
+	QMI8658_CTRL9_CMD_ENABLEEXTRESET		= 0x0B,
+	QMI8658_CTRL9_CMD_ENABLETAP				= 0x0C,	
+	QMI8658_CTRL9_CMD_ENABLEPEDOMETER		= 0x0D,
+	QMI8658_CTRL9_CMD_MOTION				= 0x0E,
+	QMI8658_CTRL9_CMD_COPYUSID				= 0x10,
+	QMI8658_CTRL9_CMD_SETRPU				= 0x11,
+	QMI8658_CTRL9_CMD_ON_DEMAND_CALI		= 0xA2,
+	QMI8658_CTRL9_CMD_DBG_WOM_DATA_ENABLE	= 0xF8
 };
 
 // Data structure for sensor readings
@@ -209,6 +277,7 @@ public:
     // Print formatted sensor data (helper function)
     void printSensorData(QMI8658_Data &data);     // Print with current precision and units
     void printSensorData(QMI8658_Data &data, int precision); // Print with specified precision
+    void qmi8658_on_demand_cali(void); //calibrate gyroscope
     
 private:
     TwoWire *_wire;

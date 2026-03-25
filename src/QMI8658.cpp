@@ -584,3 +584,15 @@ void QMI8658::updateGyroScale(QMI8658_GyroRange range) {
 int16_t QMI8658::combineBytes(uint8_t lsb, uint8_t msb) {
     return (int16_t)((uint16_t)msb << 8 | lsb);
 }
+
+void QMI8658::qmi8658_on_demand_cali(void)
+{
+	//Serial.print("qmi8658_on_demand_cali start\n");
+	writeRegister (QMI8658_RESET, 0xb0);
+	delay(10);	// delay
+	writeRegister(QMI8658_CTRL9, (unsigned char)QMI8658_CTRL9_CMD_ON_DEMAND_CALI);
+	delay(2200);	// delay 2000ms above
+	writeRegister(QMI8658_CTRL9, (unsigned char)QMI8658_CTRL9_CMD_NOP);
+	delay(100);	// delay
+	//Serial.print("qmi8658_on_demand_cali done\n");
+}
