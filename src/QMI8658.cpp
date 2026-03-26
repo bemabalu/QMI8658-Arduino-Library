@@ -380,6 +380,14 @@ uint8_t QMI8658::getWhoAmI() {
     return who_am_i;
 }
 
+uint8_t QMI8658::getRevision() {
+    uint8_t revision;
+    if (!readRegister(QMI8658_REVISION, revision)) {
+        return 0; // Indicate error
+    }
+    return (int8_t)revision;
+}
+
 bool QMI8658::reset() {
     // Soft reset
     return writeRegister(QMI8658_CTRL1, 0x80);
@@ -585,14 +593,16 @@ int16_t QMI8658::combineBytes(uint8_t lsb, uint8_t msb) {
     return (int16_t)((uint16_t)msb << 8 | lsb);
 }
 
-void QMI8658::qmi8658_on_demand_cali(void)
+void QMI8658::onDemandCalibration(void)
 {
 	//Serial.print("qmi8658_on_demand_cali start\n");
-	writeRegister (QMI8658_RESET, 0xb0);
+	writeRegister (QMI8658_CTRL7, QMI8658_DISABLE_ALL);
 	delay(10);	// delay
 	writeRegister(QMI8658_CTRL9, (unsigned char)QMI8658_CTRL9_CMD_ON_DEMAND_CALI);
-	delay(2200);	// delay 2000ms above
-	writeRegister(QMI8658_CTRL9, (unsigned char)QMI8658_CTRL9_CMD_NOP);
-	delay(100);	// delay
+    uint8_t status=0x00;
+    while (!(status & (1<<7)))
+    {
+        readRegister(QMI8658_STATUSINT, status); // dummy read to trigger calibration
+    }
 	//Serial.print("qmi8658_on_demand_cali done\n");
 }

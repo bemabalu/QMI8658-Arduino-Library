@@ -80,7 +80,7 @@ enum QMI8658_Register {
     QMI8658_FIFO_STATUS    = 0x16,  //FIFO Status
     QMI8658_FIFO_DATA      = 0x17,  //FIFO Data Output Register
     //Status Registers
-    QMI8658STATUSINT       = 0x2D,  //Sensor Data Availability with the Locking mechanism, CmdDone (CTRL9 protocol bit).
+    QMI8658_STATUSINT       = 0x2D,  //Sensor Data Availability with the Locking mechanism, CmdDone (CTRL9 protocol bit).
     QMI8658_STATUS0        = 0x2E,  //Output Data Over Run and Data Availability.
     QMI8658_STATUS1        = 0x2F,  //Miscellaneous Status: Any Motion, No Motion, Significant Motion, Pedometer, Tap
     //Timestamp Register
@@ -251,6 +251,7 @@ public:
     // Utility methods
     bool isDataReady();
     uint8_t getWhoAmI();
+    uint8_t getRevision(); //Variant A: 0x7c, Variant C: 0x79
     bool reset();
     
     // Unit configuration (affects readAccel, readGyro, readSensorData)
@@ -277,7 +278,7 @@ public:
     // Print formatted sensor data (helper function)
     void printSensorData(QMI8658_Data &data);     // Print with current precision and units
     void printSensorData(QMI8658_Data &data, int precision); // Print with specified precision
-    void qmi8658_on_demand_cali(void); //calibrate gyroscope
+    void onDemandCalibration(void); //calibrate gyroscope
     
 private:
     TwoWire *_wire;
